@@ -55,4 +55,10 @@ AGENT_MD_PATH=/path/to/instructions.md d_claude
 
 - Agents run as a non-root user inside the container.
 - Secret files in the working directory (`.env*`, `.npmrc`, `.pypirc`, etc.) are automatically masked — they appear as empty files inside the container.
+- To mask additional files per project, create a `.nullmounts` file in the project root with one path per line (relative to the project root). Lines starting with `#` are treated as comments.
+  ```
+  # .nullmounts example
+  secrets.json
+  config/api_keys.yml
+  ```
 - Containers are removed after each run (`--rm`).

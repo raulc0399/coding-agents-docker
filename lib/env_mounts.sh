@@ -30,4 +30,13 @@ env_null_mounts() {
       \) \
       -print0
   )
+
+  # Per-project overrides: each line in .nullmounts is an additional path to mask
+  local nullmounts_file="$src_dir/.nullmounts"
+  if [[ -f "$nullmounts_file" ]]; then
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      [[ -z "$line" || "$line" == \#* ]] && continue
+      mounts_ref+=("-v" "/dev/null:/workspace/${line}:ro")
+    done < "$nullmounts_file"
+  fi
 }
