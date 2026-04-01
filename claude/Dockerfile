@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g @anthropic-ai/claude-code
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 ARG UID=1000
 ARG GID=1000

@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g @githubnext/github-copilot-cli
+RUN curl -fsSL https://gh.io/copilot-install | bash
 
 ARG UID=1000
 ARG GID=1000
