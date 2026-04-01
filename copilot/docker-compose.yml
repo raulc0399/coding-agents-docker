@@ -1,0 +1,13 @@
+services:
+  copilot:
+    build:
+      context: .
+      args:
+        UID: ${HOST_UID:-1000}
+        GID: ${HOST_GID:-1000}
+    image: d_copilot
+    volumes:
+      - ${HOST_WORKDIR}:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true

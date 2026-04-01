@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/env_mounts.sh"
+
+COMPOSE_FILE="${SCRIPT_DIR}/codex/docker-compose.yml"
+HOST_WORKDIR="$(pwd)"
+
+# Build /dev/null overlay mounts for .env* files
+read -ra ENV_MOUNTS <<< "$(env_null_mounts "${HOST_WORKDIR}")"
+
+# Agent instructions mount
+AGENT_MD_MOUNT=()
+if [ -n "${AGENT_MD_PATH:-}" ] && [ -f "${AGENT_MD_PATH}" ]; then
+  AGENT_MD_MOUNT=("-v" "${AGENT_MD_PATH}:/home/agent/.codex/AGENTS.md:ro")
+fi
+
+export HOST_UID="$(id -u)"
+export HOST_GID="$(id -g)"
+export HOST_WORKDIR
+
+docker compose -f "${COMPOSE_FILE}" run --rm \
+  "${AGENT_MD_MOUNT[@]+"${AGENT_MD_MOUNT[@]}"}" \
+  "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
+  codex
