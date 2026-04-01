@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
-# Returns a list of -v /dev/null:/workspace/<file>:ro flags for each .env* file found in $1
+# Populates the provided array with -v /dev/null:/workspace/<file>:ro flags for secret files found in $1
 
 env_null_mounts() {
   local src_dir="$1"
-  local mounts=()
+  local -n mounts_ref="$2"
+  local file
+  local rel
 
-  # Add patterns here to expand the list
-  local patterns=(
-    ".env"
-    ".env.*"
-    ".envrc"
+  mounts_ref=()
+
+  while IFS= read -r -d '' file; do
+    rel="${file#"$src_dir"/}"
+    mounts_ref+=("-v" "/dev/null:/workspace/${rel}:ro")
+  done < <(
+    find "$src_dir" -type f \
+      \( \
+        -name '.env' -o \
+        -name '.env.*' -o \
+        -name '.envrc' -o \
+        -name '.npmrc' -o \
+        -name '.yarnrc' -o \
+        -name '.yarnrc.yml' -o \
+        -name '.pypirc' -o \
+        -name 'pip.conf' -o \
+        -name 'auth.json' \
+      \) \
+      -print0
   )
-
-  for pattern in "${patterns[@]}"; do
-    for f in "${src_dir}"/${pattern}; do
-      [ -f "$f" ] || continue
-      local rel="${f#${src_dir}/}"
-      mounts+=("-v" "/dev/null:/workspace/${rel}:ro")
-    done
-  done
-
-  echo "${mounts[@]}"
 }

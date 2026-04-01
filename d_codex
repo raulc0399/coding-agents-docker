@@ -7,8 +7,9 @@ source "${SCRIPT_DIR}/lib/env_mounts.sh"
 COMPOSE_FILE="${SCRIPT_DIR}/codex/docker-compose.yml"
 HOST_WORKDIR="$(pwd)"
 
-# Build /dev/null overlay mounts for .env* files
-read -ra ENV_MOUNTS <<< "$(env_null_mounts "${HOST_WORKDIR}")"
+# Build /dev/null overlay mounts for secret files
+ENV_MOUNTS=()
+env_null_mounts "${HOST_WORKDIR}" ENV_MOUNTS
 
 # Agent instructions mount
 AGENT_MD_MOUNT=()
