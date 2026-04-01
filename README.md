@@ -11,7 +11,7 @@ Run AI coding agents (Claude, Codex, Copilot) in isolated Docker containers with
 
 1. Clone the repository:
    ```bash
-   git clone <repo-url>
+   git clone git@github.com:raulc0399/coding-agents-docker-.git
    cd coding-agents-docker
    ```
 
