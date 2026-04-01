@@ -23,7 +23,10 @@ env_null_mounts() {
         -name '.yarnrc.yml' -o \
         -name '.pypirc' -o \
         -name 'pip.conf' -o \
-        -name 'auth.json' \
+        -name 'auth.json' -o \
+        -name '.pnpmfile.cjs' -o \
+        -name '.sentryclirc' -o \
+        -name '.vercelrc' \
       \) \
       -print0
   )

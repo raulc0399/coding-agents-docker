@@ -7,6 +7,7 @@ BIN_DIR="${HOME}/.local/bin"
 mkdir -p "${BIN_DIR}"
 
 for cmd in d_claude d_codex d_copilot; do
+  chmod +x "${SCRIPT_DIR}/${cmd}"
   ln -sf "${SCRIPT_DIR}/${cmd}" "${BIN_DIR}/${cmd}"
   echo "Linked ${BIN_DIR}/${cmd} -> ${SCRIPT_DIR}/${cmd}"
 done
