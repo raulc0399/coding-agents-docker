@@ -49,7 +49,15 @@ You can provide a Markdown file with custom instructions for the agent:
 
 ```bash
 AGENTS_MD_PATH=/path/to/instructions.md d_claude
+AGENTS_MD_PATH=/path/to/instructions.md d_codex
+AGENTS_MD_PATH=/path/to/instructions.md d_copilot
 ```
+
+The file is mounted read-only into the global instructions location each agent expects:
+
+- Claude: `~/.claude/CLAUDE.md`
+- Codex: `~/.codex/AGENTS.md`
+- Copilot: `~/.copilot/copilot-instructions.md`
 
 ## Security
 

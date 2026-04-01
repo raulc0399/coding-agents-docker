@@ -10,18 +10,14 @@ HOST_WORKDIR="$(pwd)"
 # Build /dev/null overlay mounts for secret files
 ENV_MOUNTS=()
 env_null_mounts "${HOST_WORKDIR}" ENV_MOUNTS
-
-# Agent instructions mount
-AGENT_MD_MOUNT=()
-if [ -n "${AGENTS_MD_PATH:-}" ] && [ -f "${AGENTS_MD_PATH}" ]; then
-  AGENT_MD_MOUNT=("-v" "${AGENTS_MD_PATH}:/home/agent/.copilot/copilot-instructions.md:ro")
-fi
+AGENT_ARGS=()
+agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.copilot/copilot-instructions.md" AGENT_ARGS
 
 export HOST_UID="$(id -u)"
 export HOST_GID="$(id -g)"
 export HOST_WORKDIR
 
 docker compose -f "${COMPOSE_FILE}" run --rm \
-  "${AGENT_MD_MOUNT[@]+"${AGENT_MD_MOUNT[@]}"}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
+  "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
   copilot
