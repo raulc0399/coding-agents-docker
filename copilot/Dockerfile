@@ -13,8 +13,8 @@ RUN getent group ${GID} >/dev/null 2>&1 || groupadd -g ${GID} agent \
 USER ${UID}
 ENV HOME=/home/agent
 ENV PATH=/home/agent/.local/bin:$PATH
+WORKDIR /workspace
 
 RUN curl -fsSL https://gh.io/copilot-install | bash
-WORKDIR /workspace
 
 ENTRYPOINT ["bash", "-lc", "copilot"]
