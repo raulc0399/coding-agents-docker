@@ -8,8 +8,7 @@ ARG GID=1000
 
 RUN getent group ${GID} >/dev/null 2>&1 || groupadd -g ${GID} agent \
     && getent passwd ${UID} >/dev/null 2>&1 || useradd -u ${UID} -g ${GID} -m -s /bin/bash agent \
-    && if [ ! -d /home/agent ]; then ln -s "$(getent passwd ${UID} | cut -d: -f6)" /home/agent; fi \
-    && mkdir -p /home/agent/.codex
+    && if [ ! -d /home/agent ]; then ln -s "$(getent passwd ${UID} | cut -d: -f6)" /home/agent; fi
 
 USER ${UID}
 ENV HOME=/home/agent
