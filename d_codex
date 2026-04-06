@@ -17,7 +17,7 @@ export HOST_UID="$(id -u)"
 export HOST_GID="$(id -g)"
 export HOST_WORKDIR
 
-docker compose -f "${COMPOSE_FILE}" run --rm \
+docker compose -f "${COMPOSE_FILE}" run --rm --name d-codex \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
   codex
