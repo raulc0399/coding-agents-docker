@@ -39,10 +39,17 @@ Run any agent from any directory on your machine:
 d_claude    # Claude Code (Anthropic)
 d_codex     # Codex (OpenAI)
 d_copilot   # Copilot (GitHub)
+rebuild_containers   # Rebuild all agent images
 ```
 
 The current working directory is automatically mounted as `/workspace` inside the container.
 Agent configuration is persisted in your host home directory (`~/.claude`, `~/.codex`, `~/.copilot`), so setup does not need to be repeated on every start.
+
+To rebuild all agent images after changing Dockerfiles or compose configuration:
+
+```bash
+rebuild_containers
+```
 
 ### Agent instructions (optional)
 
