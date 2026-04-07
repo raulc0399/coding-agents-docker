@@ -6,6 +6,8 @@ services:
         UID: ${HOST_UID:-1000}
         GID: ${HOST_GID:-1000}
     image: d_claude
+    environment:
+      CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING: "1"
     volumes:
       - ${HOST_WORKDIR}:${CONTAINER_WORKDIR}
     working_dir: ${CONTAINER_WORKDIR}

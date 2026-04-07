@@ -1,7 +1,7 @@
 FROM node:20-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates
+    git curl ca-certificates ripgrep
 
 ARG UID=1000
 ARG GID=1000
