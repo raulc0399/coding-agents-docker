@@ -22,7 +22,7 @@ export HOST_GID="$(id -g)"
 export HOST_WORKDIR
 export CONTAINER_WORKDIR
 
-docker compose -f "${COMPOSE_FILE}" run --rm --name d-copilot \
+docker compose -f "${COMPOSE_FILE}" run --rm --name "d-copilot-${PROJECT_NAME}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \

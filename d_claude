@@ -24,7 +24,7 @@ export HOST_GID="$(id -g)"
 export HOST_WORKDIR
 export CONTAINER_WORKDIR
 
-docker compose -f "${COMPOSE_FILE}" run --rm --name d-claude \
+docker compose -f "${COMPOSE_FILE}" run --rm --name "d-claude-${PROJECT_NAME}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
   "${STATE_MOUNT[@]+"${STATE_MOUNT[@]}"}" \

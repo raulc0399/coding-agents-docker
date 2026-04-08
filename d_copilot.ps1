@@ -19,6 +19,6 @@ $env:HOST_GID          = '1000'
 $env:HOST_WORKDIR      = $HostWorkdir
 $env:CONTAINER_WORKDIR = $ContainerWorkdir
 
-docker compose -f $ComposeFile run --rm --name d-copilot `
+docker compose -f $ComposeFile run --rm --name "d-copilot-$ProjectName" `
   @EnvMounts @ConfigMount @AgentArgs `
   copilot
