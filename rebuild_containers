@@ -3,6 +3,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-docker compose -f "${SCRIPT_DIR}/claude/docker-compose.yml" build
-docker compose -f "${SCRIPT_DIR}/codex/docker-compose.yml" build
-docker compose -f "${SCRIPT_DIR}/copilot/docker-compose.yml" build
+docker compose -f "${SCRIPT_DIR}/claude/docker-compose.yml" build --pull --no-cache
+docker compose -f "${SCRIPT_DIR}/codex/docker-compose.yml" build --pull --no-cache
+docker compose -f "${SCRIPT_DIR}/copilot/docker-compose.yml" build --pull --no-cache
