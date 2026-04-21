@@ -19,6 +19,7 @@ WORKDIR /workspace
 
 RUN mkdir -p "${HOME}/.codex" \
     && npm config set prefix "${HOME}/.local" \
-    && npm install -g @openai/codex typescript tsx
+    && npm install -g @openai/codex typescript tsx \
+    && python3 -m pip install --user ruff
 
 ENTRYPOINT ["bash", "-lc", "codex"]
