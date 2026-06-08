@@ -13,9 +13,9 @@ CONTAINER_WORKDIR="/workspace/${PROJECT_NAME}"
 ENV_MOUNTS=()
 env_null_mounts "${HOST_WORKDIR}" ENV_MOUNTS
 CONFIG_MOUNT=()
-agent_config_mount_args "${HOME}/.claude" "/home/agent/.claude" CONFIG_MOUNT
+agent_config_mount_args "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}" "/home/agent/.claude" CONFIG_MOUNT
 STATE_MOUNT=()
-agent_config_file_mount_args "${HOME}/.claude.json" "/home/agent/.claude.json" STATE_MOUNT
+agent_config_file_mount_args "${CLAUDE_CONFIG_JSON:-${HOME}/.claude.json}" "/home/agent/.claude.json" STATE_MOUNT
 AGENT_ARGS=()
 agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.claude/CLAUDE.md" AGENT_ARGS
 

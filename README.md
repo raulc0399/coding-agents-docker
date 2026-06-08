@@ -45,6 +45,12 @@ rebuild_containers   # Rebuild all agent images
 The current working directory is automatically mounted as `/workspace` inside the container.
 Agent configuration is persisted in your host home directory (`~/.claude`, `~/.codex`, `~/.copilot`), so setup does not need to be repeated on every start.
 
+To use an alternate Claude config directory or state file, set the corresponding env vars (defaults shown):
+
+```bash
+CLAUDE_CONFIG_DIR=~/.claude CLAUDE_CONFIG_JSON=~/.claude.json d_claude
+```
+
 To rebuild all agent images after changing Dockerfiles or compose configuration:
 
 ```bash
