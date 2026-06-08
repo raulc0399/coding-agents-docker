@@ -11,8 +11,8 @@ $ProjectName = Split-Path $HostWorkdir -Leaf
 $ContainerWorkdir = "/workspace/$ProjectName"
 
 $EnvMounts    = Get-EnvNullMounts $HostWorkdir $ContainerWorkdir
-$ConfigMount  = Get-AgentConfigMountArgs "$HOME\.claude" '/home/agent/.claude'
-$StateMount   = Get-AgentConfigFileMountArgs "$HOME\.claude.json" '/home/agent/.claude.json'
+$ConfigMount  = Get-AgentConfigMountArgs ($env:CLAUDE_CONFIG_DIR  ?? "$HOME\.claude") '/home/agent/.claude'
+$StateMount   = Get-AgentConfigFileMountArgs ($env:CLAUDE_CONFIG_JSON ?? "$HOME\.claude.json") '/home/agent/.claude.json'
 $AgentArgs    = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.claude/CLAUDE.md'
 
 $env:HOST_UID          = '1000'
