@@ -14,8 +14,8 @@ ENV_MOUNTS=()
 env_null_mounts "${HOST_WORKDIR}" ENV_MOUNTS
 CONFIG_MOUNT=()
 agent_config_mount_args "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}" "/home/agent/.claude" CONFIG_MOUNT
-STATE_MOUNT=()
-agent_config_file_mount_args "${CLAUDE_CONFIG_JSON:-${HOME}/.claude.json}" "/home/agent/.claude.json" STATE_MOUNT
+CONFIG_FILE_MOUNT=()
+agent_config_file_mount_args "${CLAUDE_CONFIG_JSON:-${HOME}/.claude.json}" "/home/agent/.claude.json" CONFIG_FILE_MOUNT
 AGENT_ARGS=()
 agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.claude/CLAUDE.md" AGENT_ARGS
 
@@ -27,6 +27,6 @@ export CONTAINER_WORKDIR
 docker compose -f "${COMPOSE_FILE}" run --rm --name "d-claude-${PROJECT_NAME}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
-  "${STATE_MOUNT[@]+"${STATE_MOUNT[@]}"}" \
+  "${CONFIG_FILE_MOUNT[@]+"${CONFIG_FILE_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
   claude

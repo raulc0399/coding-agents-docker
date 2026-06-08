@@ -10,9 +10,12 @@ $HostWorkdir = (Get-Location).Path
 $ProjectName = Split-Path $HostWorkdir -Leaf
 $ContainerWorkdir = "/workspace/$ProjectName"
 
+$ClaudeConfigDir = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { "$HOME\.claude" }
+$ClaudeConfigJson = if ($env:CLAUDE_CONFIG_JSON) { $env:CLAUDE_CONFIG_JSON } else { "$HOME\.claude.json" }
+
 $EnvMounts    = Get-EnvNullMounts $HostWorkdir $ContainerWorkdir
-$ConfigMount  = Get-AgentConfigMountArgs ($env:CLAUDE_CONFIG_DIR  ?? "$HOME\.claude") '/home/agent/.claude'
-$StateMount   = Get-AgentConfigFileMountArgs ($env:CLAUDE_CONFIG_JSON ?? "$HOME\.claude.json") '/home/agent/.claude.json'
+$ConfigMount  = Get-AgentConfigMountArgs $ClaudeConfigDir '/home/agent/.claude'
+$ConfigFileMount = Get-AgentConfigFileMountArgs $ClaudeConfigJson '/home/agent/.claude.json'
 $AgentArgs    = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.claude/CLAUDE.md'
 
 $env:HOST_UID          = '1000'
@@ -21,5 +24,5 @@ $env:HOST_WORKDIR      = $HostWorkdir
 $env:CONTAINER_WORKDIR = $ContainerWorkdir
 
 docker compose -f $ComposeFile run --rm --name "d-claude-$ProjectName" `
-  @EnvMounts @ConfigMount @StateMount @AgentArgs `
+  @EnvMounts @ConfigMount @ConfigFileMount @AgentArgs `
   claude
