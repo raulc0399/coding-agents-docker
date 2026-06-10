@@ -2,7 +2,7 @@
 input=$(cat)
 
 model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
-effort=$(jq -r '.effortLevel // "unknown"' /home/agent/.claude/settings.json 2>/dev/null || echo "unknown")
+effort=$(echo "$input" | jq -r '.effort.level // "unknown"')
 ctx_pct=$(echo "$input" | jq -r 'if .context_window.used_percentage != null then .context_window.used_percentage else "" end')
 five_h_pct=$(echo "$input" | jq -r 'if .rate_limits.five_hour.used_percentage != null then .rate_limits.five_hour.used_percentage else "" end')
 seven_d_pct=$(echo "$input" | jq -r 'if .rate_limits.seven_day.used_percentage != null then .rate_limits.seven_day.used_percentage else "" end')
