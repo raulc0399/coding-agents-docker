@@ -23,6 +23,8 @@ $env:HOST_GID          = '1000'
 $env:HOST_WORKDIR      = $HostWorkdir
 $env:CONTAINER_WORKDIR = $ContainerWorkdir
 
-docker compose -f $ComposeFile run --rm --name "d-claude-$ProjectName" `
+$ContainerName = Resolve-ContainerName "d-claude-$ProjectName"
+
+docker compose -f $ComposeFile run --rm --name $ContainerName `
   @EnvMounts @ConfigMount @ConfigFileMount @AgentArgs `
   claude

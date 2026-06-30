@@ -90,6 +90,55 @@ agent_config_file_mount_args() {
   args_ref+=("-v" "${host_file}:${container_file}")
 }
 
+container_name_exists() {
+  [[ -n "$(docker ps -a -q -f "name=^${1}$")" ]]
+}
+
+# Resolves the container name to use, handling collisions; returns it via $2.
+resolve_container_name() {
+  local base="$1"
+  local -n name_ref="$2"
+
+  # Base name is free: use it as-is
+  if ! container_name_exists "$base"; then
+    name_ref="$base"
+    return 0
+  fi
+
+  # Pick the first free numeric suffix for the "start new" option
+  local candidate
+  local i=1
+  while :; do
+    candidate="${base}-${i}"
+    container_name_exists "$candidate" || break
+    i=$((i + 1))
+  done
+
+  # Warn and ask how to proceed; default to starting new when no TTY is attached
+  echo "Warning: a container named '${base}' already exists." >&2
+  if [[ ! -t 0 ]]; then
+    echo "No interactive terminal; starting new as '${candidate}'." >&2
+    name_ref="$candidate"
+    return 0
+  fi
+
+  local answer
+  while :; do
+    read -r -p "[k=kill prev / n=start new] " answer
+    case "$answer" in
+      k|K)
+        docker rm -f "$base" >/dev/null
+        name_ref="$base"
+        return 0
+        ;;
+      n|N)
+        name_ref="$candidate"
+        return 0
+        ;;
+    esac
+  done
+}
+
 resolve_agent_instructions_path() {
   local src_dir="$1"
   local -n path_ref="$2"

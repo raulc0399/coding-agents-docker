@@ -77,6 +77,43 @@ function Get-AgentConfigFileMountArgs {
   return @('-v', "${HostFile}:${ContainerFile}")
 }
 
+function Test-ContainerNameExists {
+  param(
+    [string]$Name
+  )
+
+  $existing = docker ps -a -q -f "name=^${Name}$"
+  return -not [string]::IsNullOrWhiteSpace($existing)
+}
+
+# Resolves the container name to use, handling collisions; returns it.
+function Resolve-ContainerName {
+  param(
+    [string]$Base
+  )
+
+  # Base name is free: use it as-is
+  if (-not (Test-ContainerNameExists $Base)) { return $Base }
+
+  # Pick the first free numeric suffix for the "start new" option
+  $i = 1
+  while (Test-ContainerNameExists "${Base}-${i}") { $i++ }
+  $candidate = "${Base}-${i}"
+
+  # Warn and ask how to proceed
+  Write-Warning "A container named '${Base}' already exists."
+  while ($true) {
+    $answer = Read-Host "[k=kill prev / n=start new]"
+    if ($answer -eq 'k' -or $answer -eq 'K') {
+      docker rm -f $Base | Out-Null
+      return $Base
+    }
+    if ($answer -eq 'n' -or $answer -eq 'N') {
+      return $candidate
+    }
+  }
+}
+
 function Resolve-AgentInstructionsPath {
   param(
     [string]$SrcDir
