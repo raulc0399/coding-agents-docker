@@ -12,6 +12,7 @@ $ContainerWorkdir = "/workspace/$ProjectName"
 
 $EnvMounts   = Get-EnvNullMounts $HostWorkdir $ContainerWorkdir
 $ConfigMount = Get-AgentConfigMountArgs "$HOME\.codex" '/home/agent/.codex'
+$AgentsMount = Get-AgentConfigMountArgs "$HOME\.agents" '/home/agent/.agents'
 $AgentArgs   = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.codex/AGENTS.md'
 
 $env:HOST_UID          = '1000'
@@ -22,5 +23,5 @@ $env:CONTAINER_WORKDIR = $ContainerWorkdir
 $ContainerName = Resolve-ContainerName "d-codex-$ProjectName"
 
 docker compose -f $ComposeFile run --rm --name $ContainerName `
-  @EnvMounts @ConfigMount @AgentArgs `
+  @EnvMounts @ConfigMount @AgentsMount @AgentArgs `
   codex

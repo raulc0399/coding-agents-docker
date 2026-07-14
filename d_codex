@@ -14,6 +14,8 @@ ENV_MOUNTS=()
 env_null_mounts "${HOST_WORKDIR}" ENV_MOUNTS
 CONFIG_MOUNT=()
 agent_config_mount_args "${HOME}/.codex" "/home/agent/.codex" CONFIG_MOUNT
+AGENTS_MOUNT=()
+agent_config_mount_args "${HOME}/.agents" "/home/agent/.agents" AGENTS_MOUNT
 AGENT_ARGS=()
 agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.codex/AGENTS.md" AGENT_ARGS
 
@@ -28,5 +30,6 @@ resolve_container_name "d-codex-${PROJECT_NAME}" CONTAINER_NAME
 docker compose -f "${COMPOSE_FILE}" run --rm --name "${CONTAINER_NAME}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
+  "${AGENTS_MOUNT[@]+"${AGENTS_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
   codex
