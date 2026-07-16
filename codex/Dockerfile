@@ -23,4 +23,7 @@ RUN mkdir -p "${HOME}/.codex" \
     && curl -LsSf https://astral.sh/uv/install.sh | sh \
     && uv tool install ruff@latest
 
-ENTRYPOINT ["bash", "-lc", "codex --dangerously-bypass-approvals-and-sandbox"]
+COPY --chown=${UID}:${GID} entrypoint.sh /usr/local/bin/codex-entrypoint
+RUN chmod +x /usr/local/bin/codex-entrypoint
+
+ENTRYPOINT ["codex-entrypoint"]

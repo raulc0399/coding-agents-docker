@@ -19,10 +19,14 @@ agent_config_mount_args "${HOME}/.agents" "/home/agent/.agents" AGENTS_MOUNT
 AGENT_ARGS=()
 agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.codex/AGENTS.md" AGENT_ARGS
 
+# Load the host MCP token for the Codex container.
+HOST_MCP_TOKEN="$(<"${HOME}/.config/mcp-runner/token")"
+
 export HOST_UID="$(id -u)"
 export HOST_GID="$(id -g)"
 export HOST_WORKDIR
 export CONTAINER_WORKDIR
+export HOST_MCP_TOKEN
 
 CONTAINER_NAME=""
 resolve_container_name "d-codex-${PROJECT_NAME}" CONTAINER_NAME

@@ -9,6 +9,7 @@ services:
     environment:
       COLORTERM: truecolor
       TZ: ${TZ:-Europe/Berlin}
+      HOST_MCP_TOKEN: ${HOST_MCP_TOKEN:-}
     volumes:
       - ${HOST_WORKDIR}:${CONTAINER_WORKDIR}
     working_dir: ${CONTAINER_WORKDIR}
