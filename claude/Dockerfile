@@ -24,4 +24,7 @@ RUN mkdir -p "${HOME}/.claude" \
     && uv tool install ruff@latest \
     && curl -fsSL https://claude.ai/install.sh | bash
 
-ENTRYPOINT ["bash", "-lc", "claude --dangerously-skip-permissions"]
+COPY --chown=${UID}:${GID} entrypoint.sh /usr/local/bin/claude-entrypoint
+RUN chmod +x /usr/local/bin/claude-entrypoint
+
+ENTRYPOINT ["claude-entrypoint"]

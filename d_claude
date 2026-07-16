@@ -19,10 +19,14 @@ agent_config_file_mount_args "${CLAUDE_CONFIG_JSON:-${HOME}/.claude.json}" "/hom
 AGENT_ARGS=()
 agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.claude/CLAUDE.md" AGENT_ARGS
 
+# Load the host MCP token for the Claude container.
+HOST_MCP_TOKEN="$(<"${HOME}/.config/mcp-runner/token")"
+
 export HOST_UID="$(id -u)"
 export HOST_GID="$(id -g)"
 export HOST_WORKDIR
 export CONTAINER_WORKDIR
+export HOST_MCP_TOKEN
 
 CONTAINER_NAME=""
 resolve_container_name "d-claude-${PROJECT_NAME}" CONTAINER_NAME

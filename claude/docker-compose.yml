@@ -10,6 +10,7 @@ services:
       CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING: "1"
       COLORTERM: truecolor
       TZ: ${TZ:-Europe/Berlin}
+      HOST_MCP_TOKEN: ${HOST_MCP_TOKEN:-}
     volumes:
       - ${HOST_WORKDIR}:${CONTAINER_WORKDIR}
     working_dir: ${CONTAINER_WORKDIR}
