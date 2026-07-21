@@ -10,6 +10,8 @@ services:
       COLORTERM: truecolor
       TZ: ${TZ:-Europe/Berlin}
       HOST_MCP_TOKEN: ${HOST_MCP_TOKEN:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ${HOST_WORKDIR}:${CONTAINER_WORKDIR}
     working_dir: ${CONTAINER_WORKDIR}
