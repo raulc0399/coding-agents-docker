@@ -15,7 +15,7 @@ $ConfigMount = Get-AgentConfigMountArgs "$HOME\.codex" '/home/agent/.codex'
 $AgentsMount = Get-AgentConfigMountArgs "$HOME\.agents" '/home/agent/.agents'
 $AgentArgs   = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.codex/AGENTS.md'
 
-$HostMcpToken = Get-Content -Raw "$HOME\.config\mcp-runner\token"
+$HostMcpToken = (Get-Content -Raw "$HOME\.config\mcp-runner\token").Trim()
 
 $env:HOST_UID          = '1000'
 $env:HOST_GID          = '1000'

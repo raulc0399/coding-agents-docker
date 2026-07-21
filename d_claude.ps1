@@ -18,10 +18,13 @@ $ConfigMount  = Get-AgentConfigMountArgs $ClaudeConfigDir '/home/agent/.claude'
 $ConfigFileMount = Get-AgentConfigFileMountArgs $ClaudeConfigJson '/home/agent/.claude.json'
 $AgentArgs    = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.claude/CLAUDE.md'
 
+$HostMcpToken = (Get-Content -Raw "$HOME\.config\mcp-runner\token").Trim()
+
 $env:HOST_UID          = '1000'
 $env:HOST_GID          = '1000'
 $env:HOST_WORKDIR      = $HostWorkdir
 $env:CONTAINER_WORKDIR = $ContainerWorkdir
+$env:HOST_MCP_TOKEN    = $HostMcpToken
 
 $ContainerName = Resolve-ContainerName "d-claude-$ProjectName"
 
