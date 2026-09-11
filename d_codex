@@ -18,6 +18,10 @@ AGENTS_MOUNT=()
 agent_config_mount_args "${HOME}/.agents" "/home/agent/.agents" AGENTS_MOUNT
 AGENT_ARGS=()
 agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.codex/AGENTS.md" AGENT_ARGS
+PORT_ARGS=()
+if [[ -n "${CODEX_PORT:-}" ]]; then
+  PORT_ARGS=(-p "${CODEX_PORT}:${CODEX_PORT}")
+fi
 
 # Load the host MCP token for the Codex container.
 HOST_MCP_TOKEN="$(<"${HOME}/.config/mcp-runner/token")"
@@ -36,4 +40,5 @@ docker compose -f "${COMPOSE_FILE}" run --rm --name "${CONTAINER_NAME}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
   "${AGENTS_MOUNT[@]+"${AGENTS_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
+  "${PORT_ARGS[@]+"${PORT_ARGS[@]}"}" \
   codex

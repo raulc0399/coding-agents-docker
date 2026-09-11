@@ -57,6 +57,12 @@ To use an alternate Codex config directory (default shown):
 CODEX_CONFIG_DIR=~/.codex d_codex
 ```
 
+To publish one Codex container port to the same host port:
+
+```bash
+CODEX_PORT=1455 d_codex
+```
+
 To rebuild all agent images after changing Dockerfiles or compose configuration:
 
 ```bash
