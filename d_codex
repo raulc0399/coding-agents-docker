@@ -18,8 +18,11 @@ AGENTS_MOUNT=()
 agent_config_mount_args "${HOME}/.agents" "/home/agent/.agents" AGENTS_MOUNT
 AGENT_ARGS=()
 agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.codex/AGENTS.md" AGENT_ARGS
+NETWORK_ARGS=()
 PORT_ARGS=()
-if [[ -n "${CODEX_PORT:-}" ]]; then
+if [[ "${CODEX_HOST_NETWORK:-}" == "true" ]]; then
+  NETWORK_ARGS=(--network host)
+elif [[ -n "${CODEX_PORT:-}" ]]; then
   PORT_ARGS=(-p "${CODEX_PORT}:${CODEX_PORT}")
 fi
 
@@ -40,5 +43,6 @@ docker compose -f "${COMPOSE_FILE}" run --rm --name "${CONTAINER_NAME}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
   "${AGENTS_MOUNT[@]+"${AGENTS_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
+  "${NETWORK_ARGS[@]+"${NETWORK_ARGS[@]}"}" \
   "${PORT_ARGS[@]+"${PORT_ARGS[@]}"}" \
   codex

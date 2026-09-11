@@ -63,6 +63,14 @@ To publish one Codex container port to the same host port:
 CODEX_PORT=1455 d_codex
 ```
 
+To use host networking for a local OAuth callback, enable host networking in Docker Desktop and run:
+
+```bash
+CODEX_HOST_NETWORK=true d_codex
+```
+
+`CODEX_HOST_NETWORK` takes precedence over `CODEX_PORT`.
+
 To rebuild all agent images after changing Dockerfiles or compose configuration:
 
 ```bash

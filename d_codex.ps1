@@ -15,8 +15,11 @@ $CodexConfigDir = if ([string]::IsNullOrEmpty($env:CODEX_CONFIG_DIR)) { "$HOME\.
 $ConfigMount = Get-AgentConfigMountArgs $CodexConfigDir '/home/agent/.codex'
 $AgentsMount = Get-AgentConfigMountArgs "$HOME\.agents" '/home/agent/.agents'
 $AgentArgs   = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.codex/AGENTS.md'
+$NetworkArgs = @()
 $PortArgs    = @()
-if (-not [string]::IsNullOrEmpty($env:CODEX_PORT)) {
+if ($env:CODEX_HOST_NETWORK -eq 'true') {
+  $NetworkArgs = @('--network', 'host')
+} elseif (-not [string]::IsNullOrEmpty($env:CODEX_PORT)) {
   $PortArgs = @('-p', "$($env:CODEX_PORT):$($env:CODEX_PORT)")
 }
 
@@ -31,5 +34,5 @@ $env:HOST_MCP_TOKEN    = $HostMcpToken
 $ContainerName = Resolve-ContainerName "d-codex-$ProjectName"
 
 docker compose -f $ComposeFile run --rm --name $ContainerName `
-  @EnvMounts @ConfigMount @AgentsMount @AgentArgs @PortArgs `
+  @EnvMounts @ConfigMount @AgentsMount @AgentArgs @NetworkArgs @PortArgs `
   codex
