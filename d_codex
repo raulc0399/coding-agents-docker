@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 source "${SCRIPT_DIR}/lib/env_mounts.sh"
 
 COMPOSE_FILE="${SCRIPT_DIR}/codex/docker-compose.yml"
+HOST_NETWORK_COMPOSE_FILE="${SCRIPT_DIR}/codex/docker-compose.host-network.yml"
 HOST_WORKDIR="$(pwd)"
 PROJECT_NAME="$(basename "${HOST_WORKDIR}")"
 CONTAINER_WORKDIR="/workspace/${PROJECT_NAME}"
@@ -18,10 +19,10 @@ AGENTS_MOUNT=()
 agent_config_mount_args "${HOME}/.agents" "/home/agent/.agents" AGENTS_MOUNT
 AGENT_ARGS=()
 agent_instructions_args "${HOST_WORKDIR}" "/home/agent/.codex/AGENTS.md" AGENT_ARGS
-NETWORK_ARGS=()
+COMPOSE_ARGS=(-f "${COMPOSE_FILE}")
 PORT_ARGS=()
 if [[ "${CODEX_HOST_NETWORK:-}" == "true" ]]; then
-  NETWORK_ARGS=(--network host)
+  COMPOSE_ARGS+=(-f "${HOST_NETWORK_COMPOSE_FILE}")
 elif [[ -n "${CODEX_PORT:-}" ]]; then
   PORT_ARGS=(-p "${CODEX_PORT}:${CODEX_PORT}")
 fi
@@ -38,11 +39,10 @@ export HOST_MCP_TOKEN
 CONTAINER_NAME=""
 resolve_container_name "d-codex-${PROJECT_NAME}" CONTAINER_NAME
 
-docker compose -f "${COMPOSE_FILE}" run --rm --name "${CONTAINER_NAME}" \
+docker compose "${COMPOSE_ARGS[@]}" run --rm --name "${CONTAINER_NAME}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
   "${AGENTS_MOUNT[@]+"${AGENTS_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
-  "${NETWORK_ARGS[@]+"${NETWORK_ARGS[@]}"}" \
   "${PORT_ARGS[@]+"${PORT_ARGS[@]}"}" \
   codex

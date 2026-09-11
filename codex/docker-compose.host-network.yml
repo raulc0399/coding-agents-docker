@@ -1,0 +1,3 @@
+services:
+  codex:
+    network_mode: host

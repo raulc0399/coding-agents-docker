@@ -6,6 +6,7 @@ $ScriptDir = Split-Path -Parent (Resolve-Path $PSCommandPath)
 . "$ScriptDir\lib\env_mounts.ps1"
 
 $ComposeFile = "$ScriptDir\codex\docker-compose.yml"
+$HostNetworkComposeFile = "$ScriptDir\codex\docker-compose.host-network.yml"
 $HostWorkdir = (Get-Location).Path
 $ProjectName = Split-Path $HostWorkdir -Leaf
 $ContainerWorkdir = "/workspace/$ProjectName"
@@ -15,10 +16,10 @@ $CodexConfigDir = if ([string]::IsNullOrEmpty($env:CODEX_CONFIG_DIR)) { "$HOME\.
 $ConfigMount = Get-AgentConfigMountArgs $CodexConfigDir '/home/agent/.codex'
 $AgentsMount = Get-AgentConfigMountArgs "$HOME\.agents" '/home/agent/.agents'
 $AgentArgs   = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.codex/AGENTS.md'
-$NetworkArgs = @()
+$ComposeArgs = @('-f', $ComposeFile)
 $PortArgs    = @()
 if ($env:CODEX_HOST_NETWORK -eq 'true') {
-  $NetworkArgs = @('--network', 'host')
+  $ComposeArgs += @('-f', $HostNetworkComposeFile)
 } elseif (-not [string]::IsNullOrEmpty($env:CODEX_PORT)) {
   $PortArgs = @('-p', "$($env:CODEX_PORT):$($env:CODEX_PORT)")
 }
@@ -33,6 +34,6 @@ $env:HOST_MCP_TOKEN    = $HostMcpToken
 
 $ContainerName = Resolve-ContainerName "d-codex-$ProjectName"
 
-docker compose -f $ComposeFile run --rm --name $ContainerName `
-  @EnvMounts @ConfigMount @AgentsMount @AgentArgs @NetworkArgs @PortArgs `
+docker compose @ComposeArgs run --rm --name $ContainerName `
+  @EnvMounts @ConfigMount @AgentsMount @AgentArgs @PortArgs `
   codex
