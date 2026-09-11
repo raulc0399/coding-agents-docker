@@ -11,7 +11,8 @@ $ProjectName = Split-Path $HostWorkdir -Leaf
 $ContainerWorkdir = "/workspace/$ProjectName"
 
 $EnvMounts   = Get-EnvNullMounts $HostWorkdir $ContainerWorkdir
-$ConfigMount = Get-AgentConfigMountArgs "$HOME\.codex" '/home/agent/.codex'
+$CodexConfigDir = if ([string]::IsNullOrEmpty($env:CODEX_CONFIG_DIR)) { "$HOME\.codex" } else { $env:CODEX_CONFIG_DIR }
+$ConfigMount = Get-AgentConfigMountArgs $CodexConfigDir '/home/agent/.codex'
 $AgentsMount = Get-AgentConfigMountArgs "$HOME\.agents" '/home/agent/.agents'
 $AgentArgs   = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.codex/AGENTS.md'
 

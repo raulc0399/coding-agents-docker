@@ -51,6 +51,12 @@ To use an alternate Claude config directory or state file, set the corresponding
 CLAUDE_CONFIG_DIR=~/.claude CLAUDE_CONFIG_JSON=~/.claude.json d_claude
 ```
 
+To use an alternate Codex config directory (default shown):
+
+```bash
+CODEX_CONFIG_DIR=~/.codex d_codex
+```
+
 To rebuild all agent images after changing Dockerfiles or compose configuration:
 
 ```bash
@@ -77,7 +83,7 @@ the following aliases can be added:
 
 ```bash
 alias claude_session='AGENTS_MD_PATH=~/<path to agents file>/AGENTS.md d_claude'
-alias codex_session='AGENTS_MD_PATH=~/<path to agents file>/AGENTS.md d_codex'
+alias codex_session='CODEX_CONFIG_DIR=~/.codex_session AGENTS_MD_PATH=~/<path to agents file>/AGENTS.md d_codex'
 alias copilot_session='AGENTS_MD_PATH=~/<path to agents file>/AGENTS.md d_copilot'
 ```
 

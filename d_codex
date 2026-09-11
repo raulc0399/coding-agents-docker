@@ -13,7 +13,7 @@ CONTAINER_WORKDIR="/workspace/${PROJECT_NAME}"
 ENV_MOUNTS=()
 env_null_mounts "${HOST_WORKDIR}" ENV_MOUNTS
 CONFIG_MOUNT=()
-agent_config_mount_args "${HOME}/.codex" "/home/agent/.codex" CONFIG_MOUNT
+agent_config_mount_args "${CODEX_CONFIG_DIR:-${HOME}/.codex}" "/home/agent/.codex" CONFIG_MOUNT
 AGENTS_MOUNT=()
 agent_config_mount_args "${HOME}/.agents" "/home/agent/.agents" AGENTS_MOUNT
 AGENT_ARGS=()
