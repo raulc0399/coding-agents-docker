@@ -18,7 +18,9 @@ $ConfigMount  = Get-AgentConfigMountArgs $ClaudeConfigDir '/home/agent/.claude'
 $ConfigFileMount = Get-AgentConfigFileMountArgs $ClaudeConfigJson '/home/agent/.claude.json'
 $AgentArgs    = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.claude/CLAUDE.md'
 
-$HostMcpToken = (Get-Content -Raw "$HOME\.config\mcp-runner\token").Trim()
+$HostMcpToken = Get-Content -Raw "$HOME\.config\mcp-runner\token"
+if ($null -eq $HostMcpToken) { $HostMcpToken = "" }
+$HostMcpToken = $HostMcpToken.Trim()
 
 $env:HOST_UID          = '1000'
 $env:HOST_GID          = '1000'
