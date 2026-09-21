@@ -14,6 +14,8 @@ $ContainerWorkdir = "/workspace/$ProjectName"
 $EnvMounts   = Get-EnvNullMounts $HostWorkdir $ContainerWorkdir
 $CodexConfigDir = if ([string]::IsNullOrEmpty($env:CODEX_CONFIG_DIR)) { "$HOME\.codex" } else { $env:CODEX_CONFIG_DIR }
 $ConfigMount = Get-AgentConfigMountArgs $CodexConfigDir '/home/agent/.codex'
+$AzureConfigDir = if ([string]::IsNullOrEmpty($env:AZURE_CONFIG_DIR)) { "$HOME\.azure" } else { $env:AZURE_CONFIG_DIR }
+$AzureMount = Get-AgentConfigMountArgs $AzureConfigDir '/home/agent/.azure'
 $AgentsMount = Get-AgentConfigMountArgs "$HOME\.agents" '/home/agent/.agents'
 $AgentArgs   = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.codex/AGENTS.md'
 $ComposeArgs = @('-f', $ComposeFile)
@@ -35,5 +37,5 @@ $env:HOST_MCP_TOKEN    = $HostMcpToken
 $ContainerName = Resolve-ContainerName "d-codex-$ProjectName"
 
 docker compose @ComposeArgs run --rm --name $ContainerName `
-  @EnvMounts @ConfigMount @AgentsMount @AgentArgs @PortArgs `
+  @EnvMounts @ConfigMount @AzureMount @AgentsMount @AgentArgs @PortArgs `
   codex

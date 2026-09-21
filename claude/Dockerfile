@@ -5,6 +5,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     php-cli composer \
     python3 python3-pip python3-venv
 
+RUN curl -fsSL https://aka.ms/InstallAzureCLIDeb -o /tmp/install-azure-cli.sh \
+    && bash /tmp/install-azure-cli.sh \
+    && rm /tmp/install-azure-cli.sh
+
 ARG UID=1000
 ARG GID=1000
 

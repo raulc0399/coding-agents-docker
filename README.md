@@ -45,6 +45,10 @@ rebuild_containers   # Rebuild all agent images
 The current working directory is automatically mounted as `/workspace` inside the container.
 Agent configuration is persisted in your host home directory (`~/.claude`, `~/.codex`, `~/.agents`, `~/.copilot`), so setup does not need to be repeated on every start.
 
+Codex and Claude include Azure CLI (`az`). Their launchers mount the host's `~/.azure` directory at `/home/agent/.azure`, preserving Azure configuration and container logins across runs. Set `AZURE_CONFIG_DIR` on the host to use a different directory.
+
+To sign in from inside either container, run `az login --use-device-code` and follow the browser instructions. Host credentials may require a separate container login, particularly when the host uses Windows credential encryption.
+
 To use an alternate Claude config directory or state file, set the corresponding env vars (defaults shown):
 
 ```bash

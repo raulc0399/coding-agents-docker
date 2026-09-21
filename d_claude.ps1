@@ -15,6 +15,8 @@ $ClaudeConfigJson = if ($env:CLAUDE_CONFIG_JSON) { $env:CLAUDE_CONFIG_JSON } els
 
 $EnvMounts    = Get-EnvNullMounts $HostWorkdir $ContainerWorkdir
 $ConfigMount  = Get-AgentConfigMountArgs $ClaudeConfigDir '/home/agent/.claude'
+$AzureConfigDir = if ($env:AZURE_CONFIG_DIR) { $env:AZURE_CONFIG_DIR } else { "$HOME\.azure" }
+$AzureMount = Get-AgentConfigMountArgs $AzureConfigDir '/home/agent/.azure'
 $ConfigFileMount = Get-AgentConfigFileMountArgs $ClaudeConfigJson '/home/agent/.claude.json'
 $AgentArgs    = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.claude/CLAUDE.md'
 
@@ -29,5 +31,5 @@ $env:HOST_MCP_TOKEN    = $HostMcpToken
 $ContainerName = Resolve-ContainerName "d-claude-$ProjectName"
 
 docker compose -f $ComposeFile run --rm --name $ContainerName `
-  @EnvMounts @ConfigMount @ConfigFileMount @AgentArgs `
+  @EnvMounts @ConfigMount @AzureMount @ConfigFileMount @AgentArgs `
   claude
