@@ -26,7 +26,9 @@ if ($env:CODEX_HOST_NETWORK -eq 'true') {
   $PortArgs = @('-p', "$($env:CODEX_PORT):$($env:CODEX_PORT)")
 }
 
-$HostMcpToken = (Get-Content -Raw "$HOME\.config\mcp-runner\token").Trim()
+$HostMcpToken = Get-Content -Raw "$HOME\.config\mcp-runner\token"
+if ($null -eq $HostMcpToken) { $HostMcpToken = "" }
+$HostMcpToken = $HostMcpToken.Trim()
 
 $env:HOST_UID          = '1000'
 $env:HOST_GID          = '1000'
