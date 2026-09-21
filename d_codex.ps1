@@ -16,6 +16,10 @@ $CodexConfigDir = if ([string]::IsNullOrEmpty($env:CODEX_CONFIG_DIR)) { "$HOME\.
 $ConfigMount = Get-AgentConfigMountArgs $CodexConfigDir '/home/agent/.codex'
 $AzureConfigDir = if ([string]::IsNullOrEmpty($env:AZURE_CONFIG_DIR)) { "$HOME\.azure" } else { $env:AZURE_CONFIG_DIR }
 $AzureMount = Get-AgentConfigMountArgs $AzureConfigDir '/home/agent/.azure'
+$TerraformConfigDir = if ($env:APPDATA) { "$env:APPDATA\terraform.d" } else { "$HOME/.terraform.d" }
+$TerraformConfigFile = if ($env:TF_CLI_CONFIG_FILE) { $env:TF_CLI_CONFIG_FILE } elseif ($env:APPDATA) { "$env:APPDATA\terraform.rc" } else { "$HOME/.terraformrc" }
+$TerraformMount = Get-AgentConfigMountArgs $TerraformConfigDir '/home/agent/.terraform.d'
+$TerraformConfigMount = Get-AgentConfigFileMountArgs $TerraformConfigFile '/home/agent/.terraformrc'
 $AgentsMount = Get-AgentConfigMountArgs "$HOME\.agents" '/home/agent/.agents'
 $AgentArgs   = Get-AgentInstructionsArgs $HostWorkdir '/home/agent/.codex/AGENTS.md'
 $ComposeArgs = @('-f', $ComposeFile)
@@ -39,5 +43,5 @@ $env:HOST_MCP_TOKEN    = $HostMcpToken
 $ContainerName = Resolve-ContainerName "d-codex-$ProjectName"
 
 docker compose @ComposeArgs run --rm --name $ContainerName `
-  @EnvMounts @ConfigMount @AzureMount @AgentsMount @AgentArgs @PortArgs `
+  @EnvMounts @ConfigMount @AzureMount @TerraformMount @TerraformConfigMount @AgentsMount @AgentArgs @PortArgs `
   codex

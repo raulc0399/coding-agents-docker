@@ -49,6 +49,8 @@ Codex and Claude include Azure CLI (`az`). Their launchers mount the host's `~/.
 
 To sign in from inside either container, run `az login --use-device-code` and follow the browser instructions. Host credentials may require a separate container login, particularly when the host uses Windows credential encryption.
 
+Codex and Claude also include Terraform. Their launchers mount host `~/.terraform.d` and `~/.terraformrc` at `/home/agent/.terraform.d` and `/home/agent/.terraformrc`, preserving `terraform login` credentials and CLI settings. On Windows, the host paths are `%APPDATA%/terraform.d` and `%APPDATA%/terraform.rc`. Set `TF_CLI_CONFIG_FILE` on the host to mount an alternate CLI configuration file. Paths referenced inside that file must be valid inside the Linux container.
+
 To use an alternate Claude config directory or state file, set the corresponding env vars (defaults shown):
 
 ```bash

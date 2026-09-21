@@ -16,6 +16,10 @@ CONFIG_MOUNT=()
 agent_config_mount_args "${CLAUDE_CONFIG_DIR:-${HOME}/.claude}" "/home/agent/.claude" CONFIG_MOUNT
 AZURE_MOUNT=()
 agent_config_mount_args "${AZURE_CONFIG_DIR:-${HOME}/.azure}" "/home/agent/.azure" AZURE_MOUNT
+TERRAFORM_MOUNT=()
+agent_config_mount_args "${HOME}/.terraform.d" "/home/agent/.terraform.d" TERRAFORM_MOUNT
+TERRAFORM_CONFIG_MOUNT=()
+agent_config_file_mount_args "${TF_CLI_CONFIG_FILE:-${HOME}/.terraformrc}" "/home/agent/.terraformrc" TERRAFORM_CONFIG_MOUNT
 CONFIG_FILE_MOUNT=()
 agent_config_file_mount_args "${CLAUDE_CONFIG_JSON:-${HOME}/.claude.json}" "/home/agent/.claude.json" CONFIG_FILE_MOUNT
 AGENT_ARGS=()
@@ -37,6 +41,8 @@ docker compose -f "${COMPOSE_FILE}" run --rm --name "${CONTAINER_NAME}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
   "${AZURE_MOUNT[@]+"${AZURE_MOUNT[@]}"}" \
+  "${TERRAFORM_MOUNT[@]+"${TERRAFORM_MOUNT[@]}"}" \
+  "${TERRAFORM_CONFIG_MOUNT[@]+"${TERRAFORM_CONFIG_MOUNT[@]}"}" \
   "${CONFIG_FILE_MOUNT[@]+"${CONFIG_FILE_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
   claude

@@ -1,13 +1,20 @@
 FROM node:20-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates ripgrep jq less unzip make poppler-utils \
+    git curl ca-certificates gnupg ripgrep jq less unzip make poppler-utils \
     php-cli composer \
     python3 python3-pip python3-venv
 
 RUN curl -fsSL https://aka.ms/InstallAzureCLIDeb -o /tmp/install-azure-cli.sh \
     && bash /tmp/install-azure-cli.sh \
     && rm /tmp/install-azure-cli.sh
+
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg -o /tmp/hashicorp.asc \
+    && gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg /tmp/hashicorp.asc \
+    && . /etc/os-release \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/hashicorp.list \
+    && apt-get update && apt-get install -y --no-install-recommends terraform \
+    && rm /tmp/hashicorp.asc
 
 ARG UID=1000
 ARG GID=1000
