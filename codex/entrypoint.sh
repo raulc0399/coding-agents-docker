@@ -12,4 +12,4 @@ else
     --bearer-token-env-var HOST_MCP_TOKEN
 fi
 
-exec codex --dangerously-bypass-approvals-and-sandbox
+exec codex --no-daemon --dangerously-bypass-approvals-and-sandbox
