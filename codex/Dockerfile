@@ -1,8 +1,8 @@
-FROM node:20-slim
+FROM node:24-bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates gnupg ripgrep jq less unzip make poppler-utils \
-    php-cli composer \
+    git curl ca-certificates gnupg ripgrep jq less unzip make poppler-utils procps \
+    php-cli composer chromium fonts-liberation \
     python3 python3-pip python3-venv
 
 RUN curl -fsSL https://aka.ms/InstallAzureCLIDeb -o /tmp/install-azure-cli.sh \
@@ -30,11 +30,12 @@ RUN getent group ${GID} >/dev/null 2>&1 || groupadd -g ${GID} agent \
 USER ${UID}
 ENV HOME=/home/agent
 ENV PATH=/home/agent/.local/bin:$PATH
+ENV AGENT_BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
 WORKDIR /workspace
 
 RUN mkdir -p "${HOME}/.codex" \
     && npm config set prefix "${HOME}/.local" \
-    && npm install -g @openai/codex typescript tsx \
+    && npm install -g @openai/codex typescript tsx agent-browser@0.39.0 agent-device@0.21.24 \
     && curl -LsSf https://astral.sh/uv/install.sh | sh \
     && uv tool install ruff@latest
 

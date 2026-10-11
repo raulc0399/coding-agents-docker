@@ -9,6 +9,10 @@ services:
     environment:
       COLORTERM: truecolor
       TZ: ${TZ:-Europe/Berlin}
+      AGENT_DEVICE_DAEMON_BASE_URL: ${AGENT_DEVICE_DAEMON_BASE_URL:-}
+      AGENT_DEVICE_DAEMON_AUTH_TOKEN: ${AGENT_DEVICE_DAEMON_AUTH_TOKEN:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ${HOST_WORKDIR}:${CONTAINER_WORKDIR}
     working_dir: ${CONTAINER_WORKDIR}

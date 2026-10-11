@@ -83,6 +83,88 @@ To rebuild all agent images after changing Dockerfiles or compose configuration:
 rebuild_containers
 ```
 
+### Website and native app access
+
+All three images include Node.js 24, `agent-browser` 0.39.0, Chromium, and `agent-device` 0.21.24. The agents can run both CLIs directly; MCP configuration is optional.
+
+Rebuild from this repository on your Docker host, then start a new agent session. These commands use Bash:
+
+```bash
+./rebuild_containers
+```
+
+The rebuild script currently skips Copilot. To rebuild that image too:
+
+```bash
+docker build -t d_copilot copilot
+```
+
+#### Websites
+
+Ask the agent:
+
+> Use agent-browser to check http://host.docker.internal:3000. Test navigation and the login form, report browser errors, and save screenshots in the project directory.
+
+Use `http://localhost:3000` for a server running inside the same container. Use `http://host.docker.internal:3000` for a server on the Docker host; it must listen on an interface reachable from Docker, usually `0.0.0.0`. Public URLs work directly.
+
+For direct CLI use inside the container:
+
+```bash
+agent-browser open https://example.com
+agent-browser snapshot -i
+agent-browser screenshot ./website.png
+agent-browser errors
+agent-browser close
+```
+
+Use `agent-browser click @e1` or `agent-browser fill @e2 "text"` with references from the latest snapshot, then take another snapshot after navigation. The browser runs headlessly; screenshots saved in the mounted project remain on the host. Browser login state is temporary unless explicitly saved outside the disposable container.
+
+Run `agent-browser skills get core` for the bundled usage guide, or `agent-browser doctor` to check the browser installation. See the [agent-browser documentation](https://github.com/vercel-labs/agent-browser).
+
+#### Native iOS and Android apps
+
+The container includes the client. Run the emulator, simulator, or physical device on a device host: iOS requires a Mac with Xcode; Android requires the Android SDK/ADB and an emulator or an authorized device. Physical iOS devices also require Developer Mode, pairing, and runner signing as described in the [installation guide](https://oss.callstack.com/agent-device/docs/installation).
+
+On the device host with Node.js 24 installed:
+
+```bash
+npm install -g agent-device@0.21.24
+agent-device doctor
+agent-device proxy --host 0.0.0.0 --port 4310
+```
+
+Keep the proxy running. It prints an authentication token; allow port 4310 only from your Docker host/network.
+
+In another host terminal, set the connection before starting the agent:
+
+```bash
+export AGENT_DEVICE_DAEMON_BASE_URL=http://host.docker.internal:4310/agent-device
+read -rsp 'Proxy token: ' AGENT_DEVICE_DAEMON_AUTH_TOKEN
+export AGENT_DEVICE_DAEMON_AUTH_TOKEN
+d_codex
+```
+
+Use `d_claude` or `d_copilot` instead as needed. All three Compose files forward these variables. If the device host is a different machine, replace `host.docker.internal` with its reachable address or use an HTTPS tunnel as described in the [remote proxy guide](https://oss.callstack.com/agent-device/docs/remote-proxy).
+
+Ask the agent:
+
+> Use agent-device to connect to the configured proxy, list Android devices and installed apps, open my app, test its navigation, and save screenshots in the project directory. Close the session and disconnect when finished.
+
+Equivalent commands inside the container:
+
+```bash
+agent-device connect proxy
+agent-device devices --platform android
+agent-device apps --platform android
+agent-device open com.example.app --platform android
+agent-device snapshot -i
+agent-device screenshot ./app.png
+agent-device close
+agent-device disconnect
+```
+
+Replace `com.example.app` with the package or bundle ID from `apps`; use `--platform ios` for iOS. Use `agent-device click @e1` and `agent-device fill @e2 "text"` with current snapshot references. Run `agent-device help workflow` for the command guide. No device connection is created by rebuilding the images.
+
 ### Agent instructions (optional)
 
 You can provide a Markdown file with custom instructions for the agent:
