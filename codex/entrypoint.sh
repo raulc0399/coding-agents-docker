@@ -12,4 +12,38 @@ else
     --bearer-token-env-var HOST_MCP_TOKEN
 fi
 
+# Read only the account label from the saved credentials; never print tokens.
+account=$(node <<'NODE'
+const fs = require('node:fs');
+const path = require('node:path');
+
+let account = 'unavailable';
+try {
+    const configDirectory = process.env.CODEX_HOME || path.join(process.env.HOME, '.codex');
+    const auth = JSON.parse(fs.readFileSync(path.join(configDirectory, 'auth.json'), 'utf8'));
+
+    if (auth.auth_mode === 'apikey' || (!auth.auth_mode && auth.OPENAI_API_KEY)) {
+        account = 'API key';
+    } else if (auth.tokens?.id_token) {
+        const payload = auth.tokens.id_token.split('.')[1];
+        const claims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+        if (typeof claims.email === 'string' && claims.email) {
+            account = claims.email;
+        }
+    }
+} catch {
+    // Missing or unreadable credentials must not prevent Codex from starting.
+}
+
+console.log(account);
+NODE
+)
+
+if [[ -t 0 && -t 1 ]]; then
+  printf '\033[1;93mCodex account: %s\033[0m\n' "$account"
+  read -r -p "Press Enter to continue… " || true
+else
+  printf 'Codex account: %s\n' "$account"
+fi
+
 exec codex --no-daemon --dangerously-bypass-approvals-and-sandbox

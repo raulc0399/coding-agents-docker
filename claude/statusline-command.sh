@@ -11,6 +11,9 @@ seven_d_reset=$(echo "$input" | jq -r 'if .rate_limits.seven_day.resets_at != nu
 
 out="$model | $effort"
 
+account=$(claude auth status </dev/null 2>/dev/null | jq -r 'if .loggedIn == true then .email // empty else empty end' 2>/dev/null) || account=""
+[ -n "$account" ] && out="$out | $account"
+
 [ -n "$ctx_pct" ] && out="$out | context:$(printf '%.0f' "$ctx_pct")% used"
 [ -n "$five_h_pct" ] && out="$out | 5h:$(printf '%.0f' "$five_h_pct")% used"
 [ -n "$seven_d_pct" ] && out="$out | 7d:$(printf '%.0f' "$seven_d_pct")% used"
