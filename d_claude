@@ -9,6 +9,12 @@ HOST_WORKDIR="$(pwd)"
 PROJECT_NAME="$(basename "${HOST_WORKDIR}")"
 CONTAINER_WORKDIR="/workspace/${PROJECT_NAME}"
 
+CONTAINER_NAME=""
+find_agent_container claude "${HOST_WORKDIR}" CONTAINER_NAME
+if [[ -n "${CONTAINER_NAME}" ]]; then
+  exec docker exec -it "${CONTAINER_NAME}" claude-entrypoint
+fi
+
 # Build /dev/null overlay mounts for secret files
 ENV_MOUNTS=()
 env_null_mounts "${HOST_WORKDIR}" ENV_MOUNTS
@@ -34,10 +40,11 @@ export HOST_WORKDIR
 export CONTAINER_WORKDIR
 export HOST_MCP_TOKEN
 
-CONTAINER_NAME=""
 resolve_container_name "d-claude-${PROJECT_NAME}" CONTAINER_NAME
 
-docker compose -f "${COMPOSE_FILE}" run --rm --name "${CONTAINER_NAME}" \
+docker compose -f "${COMPOSE_FILE}" run --rm -d --entrypoint sleep --name "${CONTAINER_NAME}" \
+  --label "${AGENT_CONTAINER_LABEL}=claude" \
+  --label "${AGENT_WORKDIR_LABEL}=${HOST_WORKDIR}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
   "${AZURE_MOUNT[@]+"${AZURE_MOUNT[@]}"}" \
@@ -45,4 +52,6 @@ docker compose -f "${COMPOSE_FILE}" run --rm --name "${CONTAINER_NAME}" \
   "${TERRAFORM_CONFIG_MOUNT[@]+"${TERRAFORM_CONFIG_MOUNT[@]}"}" \
   "${CONFIG_FILE_MOUNT[@]+"${CONFIG_FILE_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
-  claude
+  claude infinity >/dev/null
+
+exec docker exec -it "${CONTAINER_NAME}" claude-entrypoint

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if tmux has-session -t =codex 2>/dev/null; then
+  exec tmux -u attach -t =codex
+fi
+
 # Ensure Codex can authenticate to the host MCP server.
 if [[ -z "${HOST_MCP_TOKEN:-}" ]]; then
   echo "HOST_MCP_TOKEN not set" >&2
@@ -46,4 +50,4 @@ else
   printf 'Codex account: %s\n' "$account"
 fi
 
-exec codex --no-daemon --dangerously-bypass-approvals-and-sandbox
+exec tmux -u new -A -s codex codex --no-daemon --dangerously-bypass-approvals-and-sandbox

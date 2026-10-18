@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if tmux has-session -t =claude 2>/dev/null; then
+  exec tmux -u attach -t =claude
+fi
+
 # Ensure Claude can authenticate to the host MCP server.
 if [[ -z "${HOST_MCP_TOKEN:-}" ]]; then
   echo "HOST_MCP_TOKEN not set" >&2
@@ -19,4 +23,4 @@ else
   printf 'Claude account: %s\n' "${account:-unavailable}"
 fi
 
-exec claude --dangerously-skip-permissions
+exec tmux -u new -A -s claude claude --dangerously-skip-permissions

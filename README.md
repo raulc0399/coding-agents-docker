@@ -42,6 +42,14 @@ d_copilot   # Copilot (GitHub)
 rebuild_containers   # Rebuild all agent images
 ```
 
+All three images include `tmux`. `d_claude` and `d_codex` automatically start their CLIs in tmux sessions named `claude` and `codex`, each in its own container, with the existing CLI flags.
+
+Claude and Codex use `LANG=C.UTF-8` and `tmux -u` for UTF-8 character output. Their `/etc/tmux.conf` enables focus reporting, 256-color panes, and RGB output, assuming a truecolor host terminal as specified by `COLORTERM=truecolor`. Press `Ctrl+b`, then `d` to detach; the container and CLI keep running. Run `d_claude` or `d_codex` again from the same project directory to reconnect. Containers are matched by agent and full host directory path.
+
+Claude also sets `CLAUDE_CODE_TMUX_TRUECOLOR=1` to disable its own 256-color limit inside tmux, preserving truecolor UI colors such as the logo.
+
+After exiting the CLI, the container stays running; rerunning its launcher starts a new session. Use `docker ps` to find its name, then `docker stop <container-name>` to stop and remove it. Existing containers retain their original image, mounts, and environment; stop them before changing configuration or using rebuilt images.
+
 The current working directory is automatically mounted as `/workspace` inside the container.
 Agent configuration is persisted in your host home directory (`~/.claude`, `~/.codex`, `~/.agents`, `~/.copilot`), so setup does not need to be repeated on every start.
 
@@ -82,6 +90,8 @@ To rebuild all agent images after changing Dockerfiles or compose configuration:
 ```bash
 rebuild_containers
 ```
+
+To apply this tmux update, stop existing Claude/Codex containers with `docker stop <container-name>`, rebuild, then run `d_claude` or `d_codex` to create new containers. Rebuilding alone does not update existing containers.
 
 ### Website and native app access
 
@@ -199,7 +209,7 @@ alias copilot_session='AGENTS_MD_PATH=~/<path to agents file>/AGENTS.md d_copilo
   secrets.json
   config/api_keys.yml
   ```
-- Containers are removed after each run (`--rm`).
+- Containers are removed when stopped (`--rm`); Claude/Codex containers stay running after tmux detaches or the CLI exits.
 
 ### Statusline customisation
 

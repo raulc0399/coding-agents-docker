@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Populates the provided array with -v /dev/null:<container-workdir>/<file>:ro flags for secret files found in $1
 
+AGENT_CONTAINER_LABEL="coding-agents.agent"
+AGENT_WORKDIR_LABEL="coding-agents.workdir"
+
 env_null_mounts() {
   local src_dir="$1"
   local -n mounts_ref="$2"
@@ -88,6 +91,17 @@ agent_config_file_mount_args() {
   mkdir -p "$(dirname "$host_file")"
   touch "$host_file"
   args_ref+=("-v" "${host_file}:${container_file}")
+}
+
+find_agent_container() {
+  local agent="$1"
+  local workdir="$2"
+  local -n container_ref="$3"
+
+  container_ref="$(docker ps --format '{{.Names}}' \
+    --filter "label=${AGENT_CONTAINER_LABEL}=${agent}" \
+    --filter "label=${AGENT_WORKDIR_LABEL}=${workdir}")"
+  container_ref="${container_ref%%$'\n'*}"
 }
 
 container_name_exists() {

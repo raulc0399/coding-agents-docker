@@ -6,6 +6,7 @@ services:
         UID: ${HOST_UID:-1000}
         GID: ${HOST_GID:-1000}
     image: d_codex
+    init: true
     environment:
       COLORTERM: truecolor
       TZ: ${TZ:-Europe/Berlin}

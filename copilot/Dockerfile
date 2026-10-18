@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates ripgrep jq less unzip make poppler-utils procps \
+    git curl ca-certificates ripgrep jq less unzip make poppler-utils procps tmux \
     php-cli composer chromium fonts-liberation \
     python3 python3-pip python3-venv
 

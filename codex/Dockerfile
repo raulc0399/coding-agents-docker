@@ -1,9 +1,14 @@
 FROM node:24-bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates gnupg ripgrep jq less unzip make poppler-utils procps \
+    git curl ca-certificates gnupg ripgrep jq less unzip make poppler-utils procps tmux \
     php-cli composer chromium fonts-liberation \
     python3 python3-pip python3-venv
+
+RUN printf '%s\n' \
+    'set -g default-terminal "screen-256color"' \
+    'set -g focus-events on' \
+    'set -as terminal-features ",*:256:RGB"' > /etc/tmux.conf
 
 RUN curl -fsSL https://aka.ms/InstallAzureCLIDeb -o /tmp/install-azure-cli.sh \
     && bash /tmp/install-azure-cli.sh \
@@ -29,6 +34,7 @@ RUN getent group ${GID} >/dev/null 2>&1 || groupadd -g ${GID} agent \
 
 USER ${UID}
 ENV HOME=/home/agent
+ENV LANG=C.UTF-8
 ENV PATH=/home/agent/.local/bin:$PATH
 ENV AGENT_BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
 WORKDIR /workspace

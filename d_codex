@@ -10,6 +10,12 @@ HOST_WORKDIR="$(pwd)"
 PROJECT_NAME="$(basename "${HOST_WORKDIR}")"
 CONTAINER_WORKDIR="/workspace/${PROJECT_NAME}"
 
+CONTAINER_NAME=""
+find_agent_container codex "${HOST_WORKDIR}" CONTAINER_NAME
+if [[ -n "${CONTAINER_NAME}" ]]; then
+  exec docker exec -it "${CONTAINER_NAME}" codex-entrypoint
+fi
+
 # Build /dev/null overlay mounts for secret files
 ENV_MOUNTS=()
 env_null_mounts "${HOST_WORKDIR}" ENV_MOUNTS
@@ -42,10 +48,11 @@ export HOST_WORKDIR
 export CONTAINER_WORKDIR
 export HOST_MCP_TOKEN
 
-CONTAINER_NAME=""
 resolve_container_name "d-codex-${PROJECT_NAME}" CONTAINER_NAME
 
-docker compose "${COMPOSE_ARGS[@]}" run --rm --name "${CONTAINER_NAME}" \
+docker compose "${COMPOSE_ARGS[@]}" run --rm -d --entrypoint sleep --name "${CONTAINER_NAME}" \
+  --label "${AGENT_CONTAINER_LABEL}=codex" \
+  --label "${AGENT_WORKDIR_LABEL}=${HOST_WORKDIR}" \
   "${ENV_MOUNTS[@]+"${ENV_MOUNTS[@]}"}" \
   "${CONFIG_MOUNT[@]+"${CONFIG_MOUNT[@]}"}" \
   "${AZURE_MOUNT[@]+"${AZURE_MOUNT[@]}"}" \
@@ -54,4 +61,6 @@ docker compose "${COMPOSE_ARGS[@]}" run --rm --name "${CONTAINER_NAME}" \
   "${AGENTS_MOUNT[@]+"${AGENTS_MOUNT[@]}"}" \
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
   "${PORT_ARGS[@]+"${PORT_ARGS[@]}"}" \
-  codex
+  codex infinity >/dev/null
+
+exec docker exec -it "${CONTAINER_NAME}" codex-entrypoint
