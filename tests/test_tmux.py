@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import pty
 import subprocess
 import tempfile
 import unittest
@@ -27,7 +28,11 @@ if command == 'claude' and args == ['auth', 'status']:
     print('{"loggedIn":false}')
 if command == 'node':
     print('unavailable')
-if command == 'docker' and args[0] == 'ps':
+if command == 'docker' and args[0] == 'ps' and '-a' in args:
+    name = args[args.index('-f') + 1].removeprefix('name=^').removesuffix('$')
+    if name in os.environ.get('MOCK_EXISTING', '').split():
+        print('container-id')
+elif command == 'docker' and args[0] == 'ps':
     if os.environ.get('MOCK_DOCKER_ERROR') == '1':
         sys.exit(1)
     print(os.environ.get('MOCK_CONTAINER', ''), end='')
@@ -44,9 +49,12 @@ class TmuxStartupTests(unittest.TestCase):
             executable = self.directory / command
             executable.write_text(MOCK_COMMAND)
             executable.chmod(0o755)
+        token = self.directory / "home/.config/mcp-runner/token"
+        token.parent.mkdir(parents=True)
+        token.write_text("test-token")
         self.env = dict(os.environ, PATH=f"{self.directory}:{os.environ['PATH']}",
                         MOCK_LOG=str(self.log), MOCK_SESSION="0", MOCK_CONTAINER="", MOCK_DOCKER_ERROR="0",
-                        HOST_MCP_TOKEN="", BASH_ENV="")
+                        MOCK_EXISTING="", HOST_MCP_TOKEN="", BASH_ENV="", HOME=str(self.directory / "home"))
 
     def run_script(self, *args):
         self.log.write_text("")
@@ -72,17 +80,38 @@ class TmuxStartupTests(unittest.TestCase):
                     ["tmux", "-u", "attach", "-t", f"={agent}"],
                 ])
 
-    def test_launchers_reconnect_to_project_container_without_starting_another(self):
+    def run_script_with_terminal_input(self, answer, *args):
+        self.log.write_text("")
+        primary, secondary = pty.openpty()
+        self.addCleanup(os.close, primary)
+        os.write(primary, answer.encode())
+        result = subprocess.run(["bash", *args], env=self.env, stdin=secondary,
+                                capture_output=True, text=True, cwd=self.directory)
+        os.close(secondary)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return [json.loads(line) for line in self.log.read_text().splitlines()]
+
+    def test_launchers_attach_to_project_container_when_chosen(self):
         for agent in CLI_FLAGS:
             with self.subTest(agent=agent):
                 self.env["MOCK_CONTAINER"] = f"d-{agent}-project-1\n"
-                _, commands = self.run_script(str(ROOT / f"d_{agent}"))
-                self.assertEqual(commands, [
-                    ["docker", "ps", "--format", "{{.Names}}",
-                     "--filter", f"label=coding-agents.agent={agent}",
-                     "--filter", f"label=coding-agents.workdir={self.directory}"],
-                    ["docker", "exec", "-it", f"d-{agent}-project-1", f"{agent}-entrypoint"],
-                ])
+                commands = self.run_script_with_terminal_input("a\n", str(ROOT / f"d_{agent}"))
+                self.assertEqual(commands[0], [
+                    "docker", "ps", "--format", "{{.Names}}",
+                    "--filter", f"label=coding-agents.agent={agent}",
+                    "--filter", f"label=coding-agents.workdir={self.directory}"])
+                self.assertEqual(commands[-1], ["docker", "exec", "-it", f"d-{agent}-project-1", f"{agent}-entrypoint"])
+                self.assertNotIn("compose", [command[1] for command in commands if command[0] == "docker"])
+
+    def test_launchers_start_new_container_when_chosen(self):
+        for agent in CLI_FLAGS:
+            with self.subTest(agent=agent):
+                base = f"d-{agent}-{self.directory.name}"
+                self.env["MOCK_CONTAINER"] = f"{base}\n"
+                self.env["MOCK_EXISTING"] = base
+                commands = self.run_script_with_terminal_input("n\n", str(ROOT / f"d_{agent}"))
+                self.assertIn("compose", [command[1] for command in commands if command[0] == "docker"])
+                self.assertEqual(commands[-1], ["docker", "exec", "-it", f"{base}-1", f"{agent}-entrypoint"])
 
     def test_container_lookup_handles_no_match_and_duplicate_matches(self):
         for containers, expected in (("", ""), ("project-2\nproject-1\n", "project-2")):

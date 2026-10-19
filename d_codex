@@ -10,9 +10,13 @@ HOST_WORKDIR="$(pwd)"
 PROJECT_NAME="$(basename "${HOST_WORKDIR}")"
 CONTAINER_WORKDIR="/workspace/${PROJECT_NAME}"
 
+RUNNING_CONTAINER=""
+find_agent_container codex "${HOST_WORKDIR}" RUNNING_CONTAINER
+
 CONTAINER_NAME=""
-find_agent_container codex "${HOST_WORKDIR}" CONTAINER_NAME
-if [[ -n "${CONTAINER_NAME}" ]]; then
+ATTACH="false"
+resolve_container_name "d-codex-${PROJECT_NAME}" CONTAINER_NAME "${RUNNING_CONTAINER}" ATTACH
+if [[ "${ATTACH}" == "true" ]]; then
   exec docker exec -it "${CONTAINER_NAME}" codex-entrypoint
 fi
 
@@ -47,8 +51,6 @@ export HOST_GID="$(id -g)"
 export HOST_WORKDIR
 export CONTAINER_WORKDIR
 export HOST_MCP_TOKEN
-
-resolve_container_name "d-codex-${PROJECT_NAME}" CONTAINER_NAME
 
 docker compose "${COMPOSE_ARGS[@]}" run --rm -d --entrypoint sleep --name "${CONTAINER_NAME}" \
   --label "${AGENT_CONTAINER_LABEL}=codex" \

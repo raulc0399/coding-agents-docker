@@ -44,7 +44,7 @@ rebuild_containers   # Rebuild all agent images
 
 All three images include `tmux`. `d_claude` and `d_codex` automatically start their CLIs in tmux sessions named `claude` and `codex`, each in its own container, with the existing CLI flags.
 
-Claude and Codex use `LANG=C.UTF-8` and `tmux -u` for UTF-8 character output. Their `/etc/tmux.conf` enables focus reporting, 256-color panes, and RGB output, assuming a truecolor host terminal as specified by `COLORTERM=truecolor`. Press `Ctrl+b`, then `d` to detach; the container and CLI keep running. Run `d_claude` or `d_codex` again from the same project directory to reconnect. Containers are matched by agent and full host directory path.
+Claude and Codex use `LANG=C.UTF-8` and `tmux -u` for UTF-8 character output. Their `/etc/tmux.conf` enables focus reporting, 256-color panes, and RGB output, assuming a truecolor host terminal as specified by `COLORTERM=truecolor`. Press `Ctrl+b`, then `d` to detach; the container and CLI keep running. Run `d_claude` or `d_codex` again from the same project directory and choose `a` to reconnect, `k` to replace the container, or `n` to start an additional one. Containers are matched by agent and full host directory path.
 
 Claude also sets `CLAUDE_CODE_TMUX_TRUECOLOR=1` to disable its own 256-color limit inside tmux, preserving truecolor UI colors such as the logo.
 

@@ -109,12 +109,20 @@ container_name_exists() {
 }
 
 # Resolves the container name to use, handling collisions; returns it via $2.
+# Optional $3 is a running container for this project that can be attached to; $4 is set to "true" when chosen.
 resolve_container_name() {
   local base="$1"
   local -n name_ref="$2"
+  local running="${3:-}"
+  local prev="${running:-$base}"
 
-  # Base name is free: use it as-is
-  if ! container_name_exists "$base"; then
+  if [[ -n "$running" ]]; then
+    local -n attach_ref="$4"
+    attach_ref="false"
+  fi
+
+  # Base name is free and nothing to attach to: use it as-is
+  if [[ -z "$running" ]] && ! container_name_exists "$base"; then
     name_ref="$base"
     return 0
   fi
@@ -129,20 +137,31 @@ resolve_container_name() {
   done
 
   # Warn and ask how to proceed; default to starting new when no TTY is attached
-  echo "Warning: a container named '${base}' already exists." >&2
+  echo "Warning: a container named '${prev}' already exists." >&2
   if [[ ! -t 0 ]]; then
     echo "No interactive terminal; starting new as '${candidate}'." >&2
     name_ref="$candidate"
     return 0
   fi
 
+  local options="k=kill prev / n=start new"
+  if [[ -n "$running" ]]; then
+    options="a=attach / ${options}"
+  fi
+
   local answer
   while :; do
-    read -r -p "[k=kill prev / n=start new] " answer
+    read -r -p "[${options}] " answer
     case "$answer" in
+      a|A)
+        [[ -n "$running" ]] || continue
+        attach_ref="true"
+        name_ref="$running"
+        return 0
+        ;;
       k|K)
-        docker rm -f "$base" >/dev/null
-        name_ref="$base"
+        docker rm -f "$prev" >/dev/null
+        name_ref="$prev"
         return 0
         ;;
       n|N)
