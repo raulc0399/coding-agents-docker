@@ -11,6 +11,15 @@ $HostWorkdir = (Get-Location).Path
 $ProjectName = Split-Path $HostWorkdir -Leaf
 $ContainerWorkdir = "/workspace/$ProjectName"
 
+$RunningContainer = Find-AgentContainer 'codex' $HostWorkdir
+$Attach = $false
+$ContainerName = Resolve-ContainerName "d-codex-$ProjectName" $RunningContainer ([ref]$Attach)
+if ($Attach) {
+  docker exec -it $ContainerName codex-entrypoint
+  Stop-AgentContainerIfDone $ContainerName 'codex'
+  exit 0
+}
+
 $EnvMounts   = Get-EnvNullMounts $HostWorkdir $ContainerWorkdir
 $CodexConfigDir = if ([string]::IsNullOrEmpty($env:CODEX_CONFIG_DIR)) { "$HOME\.codex" } else { $env:CODEX_CONFIG_DIR }
 $ConfigMount = Get-AgentConfigMountArgs $CodexConfigDir '/home/agent/.codex'
@@ -40,8 +49,11 @@ $env:HOST_WORKDIR      = $HostWorkdir
 $env:CONTAINER_WORKDIR = $ContainerWorkdir
 $env:HOST_MCP_TOKEN    = $HostMcpToken
 
-$ContainerName = Resolve-ContainerName "d-codex-$ProjectName"
-
-docker compose @ComposeArgs run --rm --name $ContainerName `
+docker compose @ComposeArgs run --rm -d --entrypoint sleep --name $ContainerName `
+  --label "${AGENT_CONTAINER_LABEL}=codex" `
+  --label "${AGENT_WORKDIR_LABEL}=$HostWorkdir" `
   @EnvMounts @ConfigMount @AzureMount @TerraformMount @TerraformConfigMount @AgentsMount @AgentArgs @PortArgs `
-  codex
+  codex infinity | Out-Null
+
+docker exec -it $ContainerName codex-entrypoint
+Stop-AgentContainerIfDone $ContainerName 'codex'

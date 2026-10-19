@@ -1,5 +1,8 @@
 # Populates and returns -v /dev/null:<container-workdir>/<file>:ro flags for secret files found in $SrcDir
 
+$AGENT_CONTAINER_LABEL = 'coding-agents.agent'
+$AGENT_WORKDIR_LABEL = 'coding-agents.workdir'
+
 $SECRET_FILE_NAMES = @(
   '.env', '.envrc', '.npmrc', '.yarnrc', '.yarnrc.yml',
   '.pypirc', 'pip.conf', 'auth.json', '.pnpmfile.cjs',
@@ -77,6 +80,38 @@ function Get-AgentConfigFileMountArgs {
   return @('-v', "${HostFile}:${ContainerFile}")
 }
 
+function Find-AgentContainer {
+  param(
+    [string]$Agent,
+    [string]$Workdir
+  )
+
+  $containers = docker ps --format '{{.Names}}' `
+    --filter "label=${AGENT_CONTAINER_LABEL}=${Agent}" `
+    --filter "label=${AGENT_WORKDIR_LABEL}=${Workdir}"
+  if ($LASTEXITCODE -ne 0) { throw "docker ps failed" }
+
+  $first = @($containers) | Select-Object -First 1
+  if ($null -eq $first) { return '' }
+  return [string]$first
+}
+
+# Stops the container once the agent's tmux session has ended; a detached session keeps it running.
+function Stop-AgentContainerIfDone {
+  param(
+    [string]$Container,
+    [string]$Session
+  )
+
+  # Native stderr must not become a terminating error here
+  $ErrorActionPreference = 'Continue'
+
+  docker exec $Container tmux has-session -t "=${Session}" 2>$null
+  if ($LASTEXITCODE -eq 0) { return }
+
+  docker stop $Container 2>$null | Out-Null
+}
+
 function Test-ContainerNameExists {
   param(
     [string]$Name
@@ -87,13 +122,19 @@ function Test-ContainerNameExists {
 }
 
 # Resolves the container name to use, handling collisions; returns it.
+# Optional $Running is a running container for this project that can be attached to; $Attach is set to $true when chosen.
 function Resolve-ContainerName {
   param(
-    [string]$Base
+    [string]$Base,
+    [string]$Running = '',
+    [ref]$Attach
   )
 
-  # Base name is free: use it as-is
-  if (-not (Test-ContainerNameExists $Base)) { return $Base }
+  $prev = if ($Running) { $Running } else { $Base }
+  if ($Attach) { $Attach.Value = $false }
+
+  # Base name is free and nothing to attach to: use it as-is
+  if (-not $Running -and -not (Test-ContainerNameExists $Base)) { return $Base }
 
   # Pick the first free numeric suffix for the "start new" option
   $i = 1
@@ -101,12 +142,19 @@ function Resolve-ContainerName {
   $candidate = "${Base}-${i}"
 
   # Warn and ask how to proceed
-  Write-Warning "A container named '${Base}' already exists."
+  Write-Warning "A container named '${prev}' already exists."
+  $options = 'k=kill prev / n=start new'
+  if ($Running) { $options = "a=attach / ${options}" }
+
   while ($true) {
-    $answer = Read-Host "[k=kill prev / n=start new]"
+    $answer = Read-Host "[${options}]"
+    if ($Running -and ($answer -eq 'a' -or $answer -eq 'A')) {
+      $Attach.Value = $true
+      return $Running
+    }
     if ($answer -eq 'k' -or $answer -eq 'K') {
-      docker rm -f $Base | Out-Null
-      return $Base
+      docker rm -f $prev | Out-Null
+      return $prev
     }
     if ($answer -eq 'n' -or $answer -eq 'N') {
       return $candidate

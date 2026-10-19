@@ -16,7 +16,9 @@ CONTAINER_NAME=""
 ATTACH="false"
 resolve_container_name "d-claude-${PROJECT_NAME}" CONTAINER_NAME "${RUNNING_CONTAINER}" ATTACH
 if [[ "${ATTACH}" == "true" ]]; then
-  exec docker exec -it "${CONTAINER_NAME}" claude-entrypoint
+  docker exec -it "${CONTAINER_NAME}" claude-entrypoint || true
+  stop_agent_container_if_done "${CONTAINER_NAME}" claude
+  exit 0
 fi
 
 # Build /dev/null overlay mounts for secret files
@@ -56,4 +58,5 @@ docker compose -f "${COMPOSE_FILE}" run --rm -d --entrypoint sleep --name "${CON
   "${AGENT_ARGS[@]+"${AGENT_ARGS[@]}"}" \
   claude infinity >/dev/null
 
-exec docker exec -it "${CONTAINER_NAME}" claude-entrypoint
+docker exec -it "${CONTAINER_NAME}" claude-entrypoint || true
+stop_agent_container_if_done "${CONTAINER_NAME}" claude

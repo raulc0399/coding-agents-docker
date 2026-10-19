@@ -104,6 +104,18 @@ find_agent_container() {
   container_ref="${container_ref%%$'\n'*}"
 }
 
+# Stops the container once the agent's tmux session has ended; a detached session keeps it running.
+stop_agent_container_if_done() {
+  local container="$1"
+  local session="$2"
+
+  if docker exec "$container" tmux has-session -t "=${session}" 2>/dev/null; then
+    return 0
+  fi
+
+  docker stop "$container" >/dev/null 2>&1 || true
+}
+
 container_name_exists() {
   [[ -n "$(docker ps -a -q -f "name=^${1}$")" ]]
 }

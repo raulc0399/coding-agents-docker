@@ -10,6 +10,15 @@ $HostWorkdir = (Get-Location).Path
 $ProjectName = Split-Path $HostWorkdir -Leaf
 $ContainerWorkdir = "/workspace/$ProjectName"
 
+$RunningContainer = Find-AgentContainer 'claude' $HostWorkdir
+$Attach = $false
+$ContainerName = Resolve-ContainerName "d-claude-$ProjectName" $RunningContainer ([ref]$Attach)
+if ($Attach) {
+  docker exec -it $ContainerName claude-entrypoint
+  Stop-AgentContainerIfDone $ContainerName 'claude'
+  exit 0
+}
+
 $ClaudeConfigDir = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { "$HOME\.claude" }
 $ClaudeConfigJson = if ($env:CLAUDE_CONFIG_JSON) { $env:CLAUDE_CONFIG_JSON } else { "$HOME\.claude.json" }
 
@@ -34,8 +43,11 @@ $env:HOST_WORKDIR      = $HostWorkdir
 $env:CONTAINER_WORKDIR = $ContainerWorkdir
 $env:HOST_MCP_TOKEN    = $HostMcpToken
 
-$ContainerName = Resolve-ContainerName "d-claude-$ProjectName"
-
-docker compose -f $ComposeFile run --rm --name $ContainerName `
+docker compose -f $ComposeFile run --rm -d --entrypoint sleep --name $ContainerName `
+  --label "${AGENT_CONTAINER_LABEL}=claude" `
+  --label "${AGENT_WORKDIR_LABEL}=$HostWorkdir" `
   @EnvMounts @ConfigMount @AzureMount @TerraformMount @TerraformConfigMount @ConfigFileMount @AgentArgs `
-  claude
+  claude infinity | Out-Null
+
+docker exec -it $ContainerName claude-entrypoint
+Stop-AgentContainerIfDone $ContainerName 'claude'

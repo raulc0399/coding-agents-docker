@@ -22,7 +22,7 @@ command = Path(sys.argv[0]).name
 args = sys.argv[1:]
 with open(os.environ['MOCK_LOG'], 'a') as log:
     log.write(json.dumps([command, *args]) + '\\n')
-if command == 'tmux' and 'has-session' in args:
+if command in ('tmux', 'docker') and 'has-session' in args:
     sys.exit(0 if os.environ.get('MOCK_SESSION') == '1' else 1)
 if command == 'claude' and args == ['auth', 'status']:
     print('{"loggedIn":false}')
@@ -100,7 +100,7 @@ class TmuxStartupTests(unittest.TestCase):
                     "docker", "ps", "--format", "{{.Names}}",
                     "--filter", f"label=coding-agents.agent={agent}",
                     "--filter", f"label=coding-agents.workdir={self.directory}"])
-                self.assertEqual(commands[-1], ["docker", "exec", "-it", f"d-{agent}-project-1", f"{agent}-entrypoint"])
+                self.assertIn(["docker", "exec", "-it", f"d-{agent}-project-1", f"{agent}-entrypoint"], commands)
                 self.assertNotIn("compose", [command[1] for command in commands if command[0] == "docker"])
 
     def test_launchers_start_new_container_when_chosen(self):
@@ -111,7 +111,18 @@ class TmuxStartupTests(unittest.TestCase):
                 self.env["MOCK_EXISTING"] = base
                 commands = self.run_script_with_terminal_input("n\n", str(ROOT / f"d_{agent}"))
                 self.assertIn("compose", [command[1] for command in commands if command[0] == "docker"])
-                self.assertEqual(commands[-1], ["docker", "exec", "-it", f"{base}-1", f"{agent}-entrypoint"])
+                self.assertIn(["docker", "exec", "-it", f"{base}-1", f"{agent}-entrypoint"], commands)
+
+    def test_launchers_stop_container_only_when_agent_session_ended(self):
+        for session, stopped in (("0", True), ("1", False)):
+            for agent in CLI_FLAGS:
+                with self.subTest(agent=agent, session=session):
+                    container = f"d-{agent}-project-1"
+                    self.env["MOCK_SESSION"] = session
+                    self.env["MOCK_CONTAINER"] = f"{container}\n"
+                    commands = self.run_script_with_terminal_input("a\n", str(ROOT / f"d_{agent}"))
+                    self.assertIn(["docker", "exec", container, "tmux", "has-session", "-t", f"={agent}"], commands)
+                    self.assertEqual(["docker", "stop", container] in commands, stopped)
 
     def test_container_lookup_handles_no_match_and_duplicate_matches(self):
         for containers, expected in (("", ""), ("project-2\nproject-1\n", "project-2")):

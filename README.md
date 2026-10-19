@@ -48,7 +48,7 @@ Claude and Codex use `LANG=C.UTF-8` and `tmux -u` for UTF-8 character output. Th
 
 Claude also sets `CLAUDE_CODE_TMUX_TRUECOLOR=1` to disable its own 256-color limit inside tmux, preserving truecolor UI colors such as the logo.
 
-After exiting the CLI, the container stays running; rerunning its launcher starts a new session. Use `docker ps` to find its name, then `docker stop <container-name>` to stop and remove it. Existing containers retain their original image, mounts, and environment; stop them before changing configuration or using rebuilt images.
+After exiting the CLI, the launcher stops and removes the container; a detached session keeps it running. Use `docker ps` to find a detached container's name, then `docker stop <container-name>` to stop and remove it. Existing containers retain their original image, mounts, and environment; stop them before changing configuration or using rebuilt images.
 
 The current working directory is automatically mounted as `/workspace` inside the container.
 Agent configuration is persisted in your host home directory (`~/.claude`, `~/.codex`, `~/.agents`, `~/.copilot`), so setup does not need to be repeated on every start.
@@ -209,7 +209,7 @@ alias copilot_session='AGENTS_MD_PATH=~/<path to agents file>/AGENTS.md d_copilo
   secrets.json
   config/api_keys.yml
   ```
-- Containers are removed when stopped (`--rm`); Claude/Codex containers stay running after tmux detaches or the CLI exits.
+- Containers are removed when stopped (`--rm`); Claude/Codex containers stay running after tmux detaches and stop when the CLI exits.
 
 ### Statusline customisation
 

@@ -17,7 +17,9 @@ CONTAINER_NAME=""
 ATTACH="false"
 resolve_container_name "d-codex-${PROJECT_NAME}" CONTAINER_NAME "${RUNNING_CONTAINER}" ATTACH
 if [[ "${ATTACH}" == "true" ]]; then
-  exec docker exec -it "${CONTAINER_NAME}" codex-entrypoint
+  docker exec -it "${CONTAINER_NAME}" codex-entrypoint || true
+  stop_agent_container_if_done "${CONTAINER_NAME}" codex
+  exit 0
 fi
 
 # Build /dev/null overlay mounts for secret files
@@ -65,4 +67,5 @@ docker compose "${COMPOSE_ARGS[@]}" run --rm -d --entrypoint sleep --name "${CON
   "${PORT_ARGS[@]+"${PORT_ARGS[@]}"}" \
   codex infinity >/dev/null
 
-exec docker exec -it "${CONTAINER_NAME}" codex-entrypoint
+docker exec -it "${CONTAINER_NAME}" codex-entrypoint || true
+stop_agent_container_if_done "${CONTAINER_NAME}" codex
