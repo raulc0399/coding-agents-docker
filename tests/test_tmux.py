@@ -10,7 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 CLI_FLAGS = {
     "claude": ["--dangerously-skip-permissions"],
-    "codex": ["--no-daemon", "--dangerously-bypass-approvals-and-sandbox"],
+    "codex": ["--no-daemon", "--no-alt-screen", "--dangerously-bypass-approvals-and-sandbox"],
 }
 MOCK_COMMAND = """#!/usr/bin/env python3
 import json

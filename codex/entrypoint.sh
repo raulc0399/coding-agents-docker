@@ -50,4 +50,4 @@ else
   printf 'Codex account: %s\n' "$account"
 fi
 
-exec tmux -u new -A -s codex codex --no-daemon --dangerously-bypass-approvals-and-sandbox
+exec tmux -u new -A -s codex codex --no-daemon --no-alt-screen --dangerously-bypass-approvals-and-sandbox
