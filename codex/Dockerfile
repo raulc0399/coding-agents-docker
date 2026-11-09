@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates gnupg ripgrep jq less unzip make poppler-utils procps tmux \
+    git curl ca-certificates gnupg ripgrep jq less unzip make build-essential poppler-utils procps tmux \
     php-cli composer chromium fonts-liberation \
     python3 python3-pip python3-venv
 
@@ -35,9 +35,14 @@ RUN getent group ${GID} >/dev/null 2>&1 || groupadd -g ${GID} agent \
 USER ${UID}
 ENV HOME=/home/agent
 ENV LANG=C.UTF-8
-ENV PATH=/home/agent/.local/bin:$PATH
+ENV PATH=/home/agent/.cargo/bin:/home/agent/.local/bin:$PATH
 ENV AGENT_BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
 WORKDIR /workspace
+
+ARG RUST_VERSION=1.99.1
+RUN curl -fsSL https://sh.rustup.rs -o /tmp/rustup-init.sh \
+    && sh /tmp/rustup-init.sh -y --profile minimal --default-toolchain ${RUST_VERSION} --no-modify-path \
+    && rm /tmp/rustup-init.sh
 
 RUN mkdir -p "${HOME}/.codex" \
     && npm config set prefix "${HOME}/.local" \
