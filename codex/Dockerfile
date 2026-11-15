@@ -1,3 +1,11 @@
+FROM rust:1.99.1-bookworm AS prism-build
+
+WORKDIR /src
+COPY --from=prism Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY --from=prism src ./src
+COPY --from=prism prism-core ./prism-core
+RUN cargo build --locked --release
+
 FROM node:24-bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -50,6 +58,8 @@ RUN mkdir -p "${HOME}/.codex" \
     && curl -LsSf https://astral.sh/uv/install.sh | sh \
     && uv tool install ruff@latest
 
+COPY --from=prism-build /src/target/release/prism /usr/local/bin/prism
+COPY --from=prism --chown=${UID}:${GID} plugins/codex /opt/prism/plugins/codex
 COPY --chown=${UID}:${GID} entrypoint.sh /usr/local/bin/codex-entrypoint
 RUN chmod +x /usr/local/bin/codex-entrypoint
 

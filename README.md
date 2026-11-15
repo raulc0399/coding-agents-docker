@@ -199,6 +199,18 @@ alias codex_session='CODEX_CONFIG_DIR=~/.codex_session AGENTS_MD_PATH=~/<path to
 alias copilot_session='AGENTS_MD_PATH=~/<path to agents file>/AGENTS.md d_copilot'
 ```
 
+### Prism
+
+The Claude and Codex images include the [Prism](../agents_setup/features/prism/README.md) binary (`/usr/local/bin/prism`) and its native plugin (`/opt/prism/plugins/claude`, `/opt/prism/plugins/codex`). It is built from `../agents_setup/features/prism`, next to this repository; set `PRISM_SRC` to use another checkout:
+
+```bash
+PRISM_SRC=/path/to/agents_setup/features/prism ./rebuild_containers
+```
+
+The entrypoints register the `prism-local` marketplace and install `prism@prism-local` in the mounted config directory at every start. That registration points to the container path, so use a separate `CLAUDE_CONFIG_DIR` / `CODEX_CONFIG_DIR` if the same config is also used by a CLI on the host. After changing Prism, run `rebuild_containers` and start new containers.
+
+Run the Prism desktop app on the host ([build and install](../agents_setup/features/prism/app/README.md)); the bridge finds it through the pairing files `~/.claude/prism/app.json` and `~/.codex/prism/app.json`. `PRISM_APP_FILE` and `PRISM_APP_HOST` are forwarded to the containers.
+
 ## Security
 
 - Agents run as a non-root user inside the container.

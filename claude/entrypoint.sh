@@ -15,6 +15,10 @@ else
     -H "Authorization: Bearer ${HOST_MCP_TOKEN}"
 fi
 
+# Register the bundled Prism plugin; both commands are no-ops when already present.
+claude plugin marketplace add /opt/prism/plugins/claude >/dev/null || true
+claude plugin install prism@prism-local >/dev/null || true
+
 account=$( { claude auth status </dev/null 2>/dev/null || true; } | jq -er 'if .loggedIn == true then .email // .authMethod // "unavailable" else "not signed in" end' 2>/dev/null) || account="unavailable"
 if [[ -t 0 && -t 1 ]]; then
   printf '\033[1;93mClaude account: %s\033[0m\n' "${account:-unavailable}"

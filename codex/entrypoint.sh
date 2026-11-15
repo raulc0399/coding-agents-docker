@@ -16,6 +16,10 @@ else
     --bearer-token-env-var HOST_MCP_TOKEN
 fi
 
+# Register the Prism plugin from the local marketplace baked into the image.
+codex plugin marketplace add /opt/prism/plugins/codex >/dev/null 2>&1 || true
+codex plugin add prism@prism-local >/dev/null 2>&1 || true
+
 # Read only the account label from the saved credentials; never print tokens.
 account=$(node <<'NODE'
 const fs = require('node:fs');

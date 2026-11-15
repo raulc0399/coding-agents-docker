@@ -2,6 +2,8 @@ services:
   claude:
     build:
       context: .
+      additional_contexts:
+        prism: ${PRISM_SRC:-../../agents_setup/features/prism}
       args:
         UID: ${HOST_UID:-1000}
         GID: ${HOST_GID:-1000}
@@ -14,6 +16,8 @@ services:
       HOST_MCP_TOKEN: ${HOST_MCP_TOKEN:-}
       AGENT_DEVICE_DAEMON_BASE_URL: ${AGENT_DEVICE_DAEMON_BASE_URL:-}
       AGENT_DEVICE_DAEMON_AUTH_TOKEN: ${AGENT_DEVICE_DAEMON_AUTH_TOKEN:-}
+      PRISM_APP_FILE: ${PRISM_APP_FILE:-}
+      PRISM_APP_HOST: ${PRISM_APP_HOST:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
